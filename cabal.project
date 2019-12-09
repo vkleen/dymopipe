@@ -1,0 +1,7 @@
+packages: .
+
+source-repository-package
+  type: git
+  location: https://github.com/fumieval/mason.git
+  tag: 7251b09b2b8c0ca9e8d59b90a1154742f149d87f
+  --sha256: 0bf5141sk0lrwri21s59gd4659cxqbhygw75dzph9gbhjkvm7aya

@@ -1,0 +1,40 @@
+#!/usr/bin/env zsh
+
+read -r -d '' cabal_wrapper << EOM
+#!/usr/bin/env bash
+if [[ "\$1" == "--interactive" ]]; then
+  printf "%s\0" \$(pwd) "\$@"
+else
+  ghc "\$@"
+fi
+EOM
+
+get_cabal_output() {
+    chmod a+x "$1"
+    cabal v2-repl -v0 --disable-documentation --with-compiler "$1" -b Cabal
+}
+
+fixup_path() {
+    case "$2" in
+        -i[^/]*)
+            printf "-i%s/%s" "$1" ${2#-i}
+            ;;
+        *)
+            printf "%s" "$2"
+            ;;
+    esac
+}
+
+output0=(${(0)"$(get_cabal_output =(<<<${cabal_wrapper}))"})
+
+base_dir=${output0[1]}
+shift output0
+
+libdir=("$(ghc --print-libdir)")
+# output=("-B${libdir}")
+output=()
+for e in ${(@)output0:#--interactive}; do
+    output+=("$(fixup_path "$base_dir" "$e")")
+done
+
+printf "%s\n" "${(@)output}" >$HIE_BIOS_OUTPUT

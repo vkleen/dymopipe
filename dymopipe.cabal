@@ -1,11 +1,11 @@
-cabal-version:       2.0
+cabal-version:       2.2
 name:                dymopipe
 version:             0.0.0.0
 synopsis:            Pipe printing commands to a DYMO LabelWriter
 description:         Pipe printing commands to a DYMO LabelWriter
 homepage:            https://github.com/vkleen/dymopipe
 bug-reports:         https://github.com/vkleen/dymopipe/issues
-license:             BSD3
+license:             BSD-3-Clause
 license-file:        LICENSE
 author:              Viktor Kleen
 maintainer:          viktor@kleen.org
@@ -25,8 +25,14 @@ executable dymopipe
   main-is:             Main.hs
 
   build-depends:       base ^>= 4.12.0.0
-                     
-                     
+                     , relude ^>= 0.4.0
+                     , mason
+                     , bytestring
+                     , vector
+                     , usb
+  
+  mixins:              base hiding (Prelude)
+                     , relude (Relude as Prelude)
 
   ghc-options:         -Wall
                        -threaded

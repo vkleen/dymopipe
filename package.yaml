@@ -1,0 +1,88 @@
+name: dymopipe
+version: 0.0.0.0
+synopsis: Pipe printing commands to a DYMO LabelWriter 450 DUO
+description: Pipe printing commands to a DYMO LabelWriter 450 DUO
+github: vkleen/dymopipe
+license: BSD-3-Clause
+author: Viktor Kleen
+maintainer: viktor@kleen.org
+copyright: 2019 Viktor Kleen
+category: Utility
+
+ghc-options:
+  - -Wall
+  - -threaded
+  - -rtsopts
+  - -with-rtsopts=-N
+  - -Wincomplete-uni-patterns
+  - -Wincomplete-record-updates
+  - -Wcompat
+  - -Widentities
+  - -Wredundant-constraints
+  - -fhide-source-paths
+  - -Wmissing-export-lists
+  - -Wno-missing-methods
+  - -Wno-type-defaults
+
+default-extensions:
+  - AllowAmbiguousTypes
+  - ApplicativeDo
+  - DataKinds
+  - DefaultSignatures
+  - DeriveAnyClass
+  - DeriveFunctor
+  - DeriveGeneric
+  - DerivingStrategies
+  - DerivingVia
+  - DuplicateRecordFields
+  - FlexibleContexts
+  - FlexibleInstances
+  - GADTs
+  - KindSignatures
+  - LambdaCase
+  - MultiParamTypeClasses
+  - NoMonomorphismRestriction
+  - OverloadedLabels
+  - OverloadedStrings
+  - PolyKinds
+  - QuasiQuotes
+  - RecordWildCards
+  - ScopedTypeVariables
+  - StandaloneDeriving
+  - TupleSections
+  - TypeApplications
+  - TypeFamilies
+  - TypeOperators
+
+dependencies:
+  - name: base
+    mixin:
+      - hiding (Prelude)
+  - name: relude
+    mixin:
+      - (Relude as Prelude)
+  - name: transformers
+    mixin:
+      - hiding (Control.Applicative.Lift)
+
+  - ansi-wl-pprint
+  - attoparsec
+  - bytestring
+  - generic-lens
+  - generic-monoid
+  - hexquote
+  - lens
+  - mason
+  - optparse-applicative
+  - optparse-generic
+  - pretty-hex
+  - rawfilepath
+  - text
+  - type-level-sets
+  - unix
+  - usb
+  - vector
+
+executable:
+  main: Main.hs
+  source-dirs: dymopipe

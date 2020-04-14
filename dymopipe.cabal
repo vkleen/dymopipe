@@ -1,9 +1,16 @@
-cabal-version:       2.2
+cabal-version: 2.2
+
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: fccc982a8a99aa56257415970c113b165846d442e7731b8853a4776e2e7231c6
+
 name:                dymopipe
 version:             0.0.0.0
 synopsis:            Pipe printing commands to a DYMO LabelWriter 450 DUO
 description:         Pipe printing commands to a DYMO LabelWriter 450 DUO
-homepage:            https://github.com/vkleen/dymopipe
+homepage:            https://github.com/vkleen/dymopipe#readme
 bug-reports:         https://github.com/vkleen/dymopipe/issues
 license:             BSD-3-Clause
 license-file:        LICENSE
@@ -12,86 +19,45 @@ maintainer:          viktor@kleen.org
 copyright:           2019 Viktor Kleen
 category:            Utility
 build-type:          Simple
-extra-doc-files:     README.md
-                   , CHANGELOG.md
-tested-with:         GHC == 8.6.5
 
 source-repository head
-  type:                git
-  location:            https://github.com/vkleen/dymopipe.git
+  type: git
+  location: https://github.com/vkleen/dymopipe
 
 executable dymopipe
-  hs-source-dirs:      dymopipe
-  main-is:             Main.hs
-
-  other-modules:       Control.Applicative.Lift
-                     , Options
-                     , Options.ReadEnum
-
-  build-depends:       base, relude
-                     , ansi-wl-pprint
-                     , attoparsec
-                     , bytestring
-                     , generic-lens
-                     , generic-monoid
-                     , hexquote
-                     , lens
-                     , mason
-                     , optparse-applicative
-                     , optparse-generic
-                     , pretty-hex
-                     , rawfilepath
-                     , text
-                     , transformers
-                     , type-level-sets
-                     , unix
-                     , usb
-                     , vector
-
-  mixins:              base hiding (Prelude)
-                     , relude (Relude as Prelude)
-                     , transformers hiding (Control.Applicative.Lift)
-
-  ghc-options:         -Wall
-                       -threaded
-                       -rtsopts
-                       -with-rtsopts=-N
-                       -Wincomplete-uni-patterns
-                       -Wincomplete-record-updates
-                       -Wcompat
-                       -Widentities
-                       -Wredundant-constraints
-                       -fhide-source-paths
-                       -Wmissing-export-lists
-                       -Wno-missing-methods
-                       -Wno-type-defaults
-
-  default-language:    Haskell2010
-  default-extensions:  AllowAmbiguousTypes
-                       ApplicativeDo
-                       DataKinds
-                       DefaultSignatures
-                       DeriveAnyClass
-                       DeriveFunctor
-                       DeriveGeneric
-                       DerivingStrategies
-                       DerivingVia
-                       DuplicateRecordFields
-                       FlexibleContexts
-                       FlexibleInstances
-                       GADTs
-                       KindSignatures
-                       LambdaCase
-                       MultiParamTypeClasses
-                       NoMonomorphismRestriction
-                       OverloadedLabels
-                       OverloadedStrings
-                       PolyKinds
-                       QuasiQuotes
-                       RecordWildCards
-                       ScopedTypeVariables
-                       StandaloneDeriving
-                       TupleSections
-                       TypeApplications
-                       TypeFamilies
-                       TypeOperators
+  hs-source-dirs:
+      dymopipe
+  main-is: Main.hs
+  other-modules:
+      Control.Applicative.Lift
+      Options
+      Options.ReadEnum
+      Paths_dymopipe
+  build-depends:
+      ansi-wl-pprint
+    , attoparsec
+    , base
+    , bytestring
+    , generic-lens
+    , generic-monoid
+    , hexquote
+    , lens
+    , mason
+    , optparse-applicative
+    , optparse-generic
+    , pretty-hex
+    , rawfilepath
+    , relude
+    , text
+    , transformers
+    , type-level-sets
+    , unix
+    , usb
+    , vector
+  mixins:
+      base hiding (Prelude)
+    , relude (Relude as Prelude)
+    , transformers hiding (Control.Applicative.Lift)
+  ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N -Wincomplete-uni-patterns -Wincomplete-record-updates -Wcompat -Widentities -Wredundant-constraints -fhide-source-paths -Wmissing-export-lists -Wno-missing-methods -Wno-type-defaults
+  default-language: Haskell2010
+  default-extensions: AllowAmbiguousTypes ApplicativeDo DataKinds DefaultSignatures DeriveAnyClass DeriveFunctor DeriveGeneric DerivingStrategies DerivingVia DuplicateRecordFields FlexibleContexts FlexibleInstances GADTs KindSignatures LambdaCase MultiParamTypeClasses NoMonomorphismRestriction OverloadedLabels OverloadedStrings PolyKinds QuasiQuotes RecordWildCards ScopedTypeVariables StandaloneDeriving TupleSections TypeApplications TypeFamilies TypeOperators

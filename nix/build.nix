@@ -1,4 +1,4 @@
-{ ghcVersion ? "ghc882" }:
+{ ghcVersion ? "ghc883" }:
 let
   sources = import ./sources.nix;
   pkgs = import sources.nixpkgs {
@@ -72,6 +72,9 @@ let
   hsPkgs = pkgs.haskell-nix.stackProject {
     src = pkgs.haskell-nix.haskellLib.cleanGit { src = ../.; name = "dymopipe"; };
     ghc = pkgs.buildPackages.pkgs.haskell-nix.compiler."${ghcVersion}";
+    pkg-def-extras = [
+      (hackage: pkgs.lib.mapAttrs (n: v: hackage."${n}"."${v}".revisions.default) compiler-pkgs)
+    ];
     modules = [ ({config, ...}: {
       reinstallableLibGhc = true;
     }) ];

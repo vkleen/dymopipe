@@ -1,4 +1,4 @@
-{ ghcVersion ? "ghc865" }:
+{ ghcVersion ? "ghc882" }:
 let
   sources = import ./sources.nix;
   pkgs = import sources.nixpkgs {
@@ -11,45 +11,74 @@ let
   inherit (pkgs) lib;
 
   inherit (import sources."niv" {}) niv;
-  ghcide-pkgs = let
-    stack-pkgs = ({
-        extras = hackage:
-          {
-            packages = {
-              "haskell-lsp" = (((hackage.haskell-lsp)."0.18.0.0").revisions).default;
-              "haskell-lsp-types" = (((hackage.haskell-lsp-types)."0.18.0.0").revisions).default;
-              "lsp-test" = (((hackage.lsp-test)."0.8.2.0").revisions).default;
-              ghcide = ./ghcide.nix;
-              hie-bios = ./hie-bios.nix;
-            };
-          };
-        resolver = "nightly-2019-09-16";
-        modules = [ ({ lib, ... }: { packages = {}; }) { packages = {}; } ];
-    });
-    pkgSet = pkgs.haskell-nix.mkStackPkgSet {
-      stack-pkgs = stack-pkgs;
-      modules = [({config, ...}: {
-        # compiler.version = pkgs.lib.mkForce ghc.package.version;
+
+  compiler-pkgs = {
+    "binary" = "0.8.7.0";
+    "ghc-prim" = "0.5.3";
+    "haskeline" = "0.7.5.0";
+    "stm" = "2.5.0.0";
+    "unix" = "2.7.2.2";
+    "mtl" = "2.2.2";
+    "rts" = "1.0";
+    "deepseq" = "1.4.4.0";
+    "ghc-compact" = "0.1.0.0";
+    "parsec" = "3.1.14.0";
+    "directory" = "1.3.6.0";
+    "template-haskell" = "2.15.0.0";
+    "containers" = "0.6.2.1";
+    "bytestring" = "0.10.10.0";
+    "xhtml" = "3000.2.2.1";
+    "text" = "1.2.4.0";
+    "Cabal" = "3.0.1.0";
+    "time" = "1.9.3";
+    "terminfo" = "0.4.1.4";
+    "transformers" = "0.5.6.2";
+    "hpc" = "0.6.0.3";
+    "filepath" = "1.4.2.1";
+    "process" = "1.6.8.0";
+    "pretty" = "1.1.3.6";
+    "array" = "0.5.4.0";
+    "Win32" = "2.6.1.0";
+    "integer-gmp" = "1.0.2.0";
+    "alex" = "3.2.5";
+    "happy" = "1.19.12";
+  };
+  hie-pkgs = let
+    hsPkgs = pkgs.haskell-nix.stackProject {
+      src = sources.haskell-language-server;
+      stackYaml = "stack-8.8.3.yaml";
+      stack-sha256 = "1gnip814nhkdpdrr3zamih4134k6g80clx788gsg00sb7n34a3nv";
+      materialized = ./ghcide-pkgs;
+      pkg-def-extras = [
+        (hackage: pkgs.lib.mapAttrs (n: v: hackage."${n}"."${v}".revisions.default) compiler-pkgs)
+        (hackage: {
+          ghcide = import ./ghcide.nix sources.ghcide;
+        })
+      ];
+      modules = [ ({config, ...}: {
         reinstallableLibGhc = true;
-        ghc.package = pkgs.buildPackages.pkgs.haskell-nix.compiler."${ghcVersion}";
         packages.ghc.flags.ghci = pkgs.lib.mkForce true;
         packages.ghci.flags.ghci = pkgs.lib.mkForce true;
         packages.ghcide.configureFlags = [ "--enable-executable-dynamic" ];
-      })];
+        packages.haskell-lsp.components.library.doHaddock = pkgs.lib.mkForce false;
+        packages.ghcide.components.library.doHaddock = pkgs.lib.mkForce false;
+      }) ];
     };
-    inherit (pkgSet.config) hsPkgs;
   in {
-    hie-bios = hsPkgs.hie-bios.components.exes.hie-bios;
     ghcide = hsPkgs.ghcide.components.exes.ghcide // { packages = hsPkgs; };
+#    haskell-language-server = hsPkgs.haskell-language-server.components.exes.haskell-language-server;
   };
 
-  hsPkgs = pkgs.haskell-nix.cabalProject {
-    src = pkgs.haskell-nix.haskellLib.cleanGit { src = ../.; };
+  hsPkgs = pkgs.haskell-nix.stackProject {
+    src = pkgs.haskell-nix.haskellLib.cleanGit { src = ../.; name = "dymopipe"; };
     ghc = pkgs.buildPackages.pkgs.haskell-nix.compiler."${ghcVersion}";
+    modules = [ ({config, ...}: {
+      reinstallableLibGhc = true;
+    }) ];
   };
 in rec {
   inherit hsPkgs;
-  inherit (ghcide-pkgs) ghcide hie-bios;
+  inherit (hie-pkgs) ghcide;
   shell = hsPkgs.shellFor {
     packages = ps: with ps; [
       dymopipe
@@ -60,8 +89,8 @@ in rec {
 
     withHoogle = true;
     buildInputs = (with pkgs.haskellPackages; [
-      hlint stylish-haskell cabal-install niv hpack
-    ]) ++ [ ghcide hie-bios pkgs.haskell-nix.nix-tools ];
+      hlint stylish-haskell cabal-install niv hpack ghcid
+    ]) ++ [ ghcide pkgs.haskell-nix.nix-tools pkgs.stack ];
 
     shellHook = ''
       export NIX_GHC_LIBDIR=$(ghc --print-libdir)

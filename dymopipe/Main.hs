@@ -1,120 +1,77 @@
+{-# language BlockArguments #-}
+{-# language UndecidableInstances #-}
+
 module Main (main) where
 
 import Prelude hiding (readFile)
 
---import Control.Exception (mask_)
---import Control.Concurrent.MVar (mkWeakMVar)
-
 import Data.Generics.Labels()
---import qualified Control.Lens as L
---import Control.Lens.Operators
+import Text.PrettyPrint.ANSI.Leijen (hPutDoc)
+import qualified Text.PrettyPrint.ANSI.Leijen as P
+import Control.Applicative.Lift (runErrors)
+import Data.Singletons.Sigma
+import Data.Generics.Labels ()
+import qualified Control.Lens as L
+import Control.Lens.Operators ((^.))
+import qualified Data.ByteString.RawFilePath as BS
+import qualified Data.ByteString.Char8 as BS8
 
---import Data.Monoid.Generic
+import qualified Mason.Builder as M
 
---import qualified Data.Vector as V
---import qualified System.USB as USB
+import qualified Graphics.Image as G
 
---import System.Posix.Env.ByteString (getArgs)
---import Data.ByteString.RawFilePath (readFile, getContents)
-
---import Data.Hex.Quote
---import Hexdump
+import qualified System.Posix.Directory.Traversals as U
+import System.IO (hPutStrLn)
 
 import Options
+import Compile
+import Send
+
+opts :: IO SomeOptions
+opts = do
+  rawOpts <- getOptions
+  either (prettyErrors >=> const exitFailure) pure . runErrors $
+    validateOptions rawOpts
+
+  where prettyErrors es = hPutDoc stderr $
+          "Command line options are invalid:" P.<$> P.indent 2 (
+            P.vcat $ ("* " <>) <$> es
+          )
+
+canonicalizeInputPath :: SomeOptions -> IO SomeOptions
+canonicalizeInputPath o = #input canonicalize o
+  where canonicalize Stdin = pure Stdin
+        canonicalize (Path i) = Path <$> U.realpath i
+
+doCompile :: SomeCompileOptions -> IO ()
+doCompile o = do
+  eimg :: Either String (G.Image G.VS G.X G.Bit) <- G.decode G.PNG <$> case (o ^. #input) of
+    Stdin -> BS8.hGetContents stdin
+    Path p -> BS.readFile p
+  img <- either (hPutStrLn stderr >=> const exitFailure) pure eimg
+  if G.rows img /= o ^. #width . L.to fromIntegral
+    then hPutStrLn stderr "Rescaling is not implemented yet (width)" >> exitFailure
+    else pure ()
+
+  case o ^. #length of
+    Continuous -> pure ()
+    Length l -> if G.cols img > fromIntegral l
+                  then hPutStrLn stderr "Rescaling is not implemented yet (length)" >> exitFailure
+                  else pure ()
+
+  M.hPutBuilder stdout $ compile o (G.transpose . G.flipH $ img)
+
+doSend :: SomeSendOptions -> IO ()
+doSend o = do
+  inp <- case (o ^. #input) of
+    Stdin -> BS8.hGetContents stdin
+    Path p -> BS.readFile p
+  send o inp
 
 main :: IO ()
 main = do
-  print =<< getOptions
-  -- cmdLineOptions <- testOptions
-  -- print cmdLineOptions
-
-  -- ctx <- USB.newCtx
-  -- dev <- waitForDYMO ctx
-
-  -- config <- USB.getConfigDesc dev 0
-
-  -- let Just ep = config ^? labelEndpointOut
-  -- getArgs >>= \case
-  --     [ "-" ] -> getContents
-  --     [ file ] -> readFile file
-  --     _ -> pure testCommands
-  --   >>= printLabel 0 ep dev
-
---firstOutEndpoint :: L.Traversal' (V.Vector USB.InterfaceDesc) USB.EndpointAddress
---firstOutEndpoint =   L.ix 0
---                   . #interfaceEndpoints
---                   . L.traversed
---                   . #endpointAddress
---                   . L.filteredBy (#transferDirection . L.only USB.Out)
---
---labelEndpointOut :: L.Traversal' USB.ConfigDesc USB.EndpointAddress
---labelEndpointOut = #configInterfaces . L.ix 0 . firstOutEndpoint
---
---tapeEndpointOut :: L.Traversal' USB.ConfigDesc USB.EndpointAddress
---tapeEndpointOut = #configInterfaces . L.ix 1 . firstOutEndpoint
---
---printLabel :: USB.InterfaceNumber -> USB.EndpointAddress -> USB.Device -> ByteString -> IO ()
---printLabel i ep dev cmds =
---  USB.withDeviceHandle dev $ \hdl -> USB.withDetachedKernelDriver hdl i $ USB.withClaimedInterface hdl i $ do
---    transfer <- USB.newWriteTransfer USB.BulkTransfer
---                                     hdl
---                                     ep
---                                     cmds
---                                     USB.noTimeout
---    putTextLn $ "Trying to write the following to endpoint " <> show (ep ^. #endpointNumber) <> " on interface " <> show i
---    putStr . prettyHex $ cmds
---    USB.performWriteTransfer transfer >>= putTextLn.show
---
---testCommands :: ByteString
---testCommands =
---     stimes 84 [hex|1b|] -- Ensure synchronization per the documentation
---  <> [hex| 1B 40       -- Reset
---           1B 4C ff ff -- Enable continuous feed
---           1B 68       -- Enable Text Mode
---           1B 65       -- Set Print Density
---     |]
---  <> stimes 300 (  [hex|16|] <> stimes 42 [hex|00|] <> stimes 42 [hex|ff|]
---                <> [hex|16|] <> stimes 42 [hex|ff|] <> stimes 42 [hex|00|]
---                )
---  <> [hex| 1B 47 -- Short Form feed
---     |]
---  <> stimes 150 (  [hex|16|] <> stimes 42 [hex|00|] <> stimes 42 [hex|ff|]
---                )
---  <> stimes 150 (  [hex|16|] <> stimes 42 [hex|ff|] <> stimes 42 [hex|00|]
---                )
---  <> [hex| 1B 45 -- Form feed
---     |]
---  <> stimes 84 [hex|1b|] -- Ensure synchronization per the documentation
---  <> [hex| 1B 40       -- Reset
---           1B 4C ff ff -- Enable continuous feed
---           1B 69       -- Enable Graphics Mode
---           1B 65       -- Set Print Density
---     |]
---  <> stimes 300 (  [hex|16|] <> stimes 42 [hex|00|] <> stimes 42 [hex|ff|]
---                <> [hex|16|] <> stimes 42 [hex|ff|] <> stimes 42 [hex|00|]
---                )
---  <> [hex| 1B 47 -- Short Form feed
---     |]
---  <> stimes 150 (  [hex|16|] <> stimes 42 [hex|00|] <> stimes 42 [hex|ff|]
---                )
---  <> stimes 150 (  [hex|16|] <> stimes 42 [hex|ff|] <> stimes 42 [hex|00|]
---                )
---  <> [hex| 1B 45 -- Form feed
---     |]
---
---waitForDYMO :: USB.Ctx -> IO USB.Device
---waitForDYMO ctx = do
---  mv <- newEmptyMVar
---  mask_ $ do
---    h <- USB.registerHotplugCallback
---      ctx
---      USB.deviceArrived
---      USB.enumerate
---      Nothing Nothing
---      -- (Just idVendorDYMO)
---      -- (Just idProductDYMOLabelWriter450DUO)
---      Nothing
---      (\dev _ -> tryPutMVar mv dev $> USB.DeregisterThisCallback)
---    void $ mkWeakMVar mv $ USB.deregisterHotplugCallback h
---  dev <- takeMVar mv
---  pure dev
+  opts >>= canonicalizeInputPath >>= \o -> case (coerce o) of
+    SSend SLabel :&: o' -> doSend (SLabel :&: o')
+    SSend STape :&: o' -> doSend (STape :&: o')
+    SCompile SLabel :&: o' -> doCompile (SLabel :&: o')
+    SCompile STape :&: o' -> doCompile (STape :&: o')

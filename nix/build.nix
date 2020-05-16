@@ -1,99 +1,104 @@
 { ghcVersion ? "ghc883" }:
 let
   sources = import ./sources.nix;
+  haskell-nix-overlays = (import "${sources."haskell.nix"}/overlays").combined;
   pkgs = import sources.nixpkgs {
     overlays =
-      import "${sources."haskell.nix"}/overlays" ++
-      [ (self: super: {
-        "libusb-1.0" = super.libusb1;
-      }) ];
+      [ haskell-nix-overlays
+        (self: super: {
+          haskell-nix = super.haskell-nix // {
+            hackage = super.haskell-nix.hackage // {
+              lsp-test = super.haskell-nix.hackage.lsp-test // {
+                "0.10.3.0" = super.haskell-nix.hackage.lsp-test."0.10.2.0";
+              };
+              haskell-lsp = super.haskell-nix.hackage.haskell-lsp // {
+                "0.22.0.0" = super.haskell-nix.hackage.haskell-lsp."0.21.0.0";
+              };
+              haskell-lsp-types = super.haskell-nix.hackage.haskell-lsp-types // {
+                "0.22.0.0" = super.haskell-nix.hackage.haskell-lsp-types."0.21.0.0";
+              };
+            };
+            # hackageSourceJSON = ./hackage-src.json;
+            # stackageSourceJSON = ./stackage-src.json;
+          };
+        })
+        (self: super: {
+          "libusb-1.0" = super.libusb1;
+        })
+      ];
   };
   inherit (pkgs) lib;
 
   inherit (import sources."niv" {}) niv;
 
-  compiler-pkgs = {
-    "binary" = "0.8.7.0";
-    "ghc-prim" = "0.5.3";
-    "haskeline" = "0.7.5.0";
-    "stm" = "2.5.0.0";
-    "unix" = "2.7.2.2";
-    "mtl" = "2.2.2";
-    "rts" = "1.0";
-    "deepseq" = "1.4.4.0";
-    "ghc-compact" = "0.1.0.0";
-    "parsec" = "3.1.14.0";
-    "directory" = "1.3.6.0";
-    "template-haskell" = "2.15.0.0";
-    "containers" = "0.6.2.1";
-    "bytestring" = "0.10.10.0";
-    "xhtml" = "3000.2.2.1";
-    "text" = "1.2.4.0";
-    "Cabal" = "3.0.1.0";
-    "time" = "1.9.3";
-    "terminfo" = "0.4.1.4";
-    "transformers" = "0.5.6.2";
-    "hpc" = "0.6.0.3";
-    "filepath" = "1.4.2.1";
-    "process" = "1.6.8.0";
-    "pretty" = "1.1.3.6";
-    "array" = "0.5.4.0";
-    "Win32" = "2.6.1.0";
-    "integer-gmp" = "1.0.2.0";
-    "alex" = "3.2.5";
-    "happy" = "1.19.12";
-  };
+  nonReinstallablePkgs= [
+    "Cabal"
+     "rts" "ghc-heap" "ghc-prim" "integer-gmp" "integer-simple" "base"
+    "deepseq" "array" "ghc-boot-th" "pretty" "template-haskell"
+    # ghcjs custom packages
+    "ghcjs-prim" "ghcjs-th"
+    "ghc-boot"
+    "ghc" "Win32" "array" "binary" "bytestring" "containers"
+    "directory" "filepath" "ghc-boot" "ghc-compact" "ghc-prim"
+    # "ghci" "haskeline"
+    "hpc"
+    "mtl" "parsec" "process" "text" "time" "transformers"
+    "unix" "xhtml"
+    "stm" "terminfo"
+  ];
+
   hie-pkgs = let
     hsPkgs = pkgs.haskell-nix.stackProject {
-      src = sources.haskell-language-server;
+      src = pkgs.fetchgit {
+        url = sources.haskell-language-server.repo;
+        inherit (sources.haskell-language-server) rev fetchSubmodules sha256;
+      };
       stackYaml = "stack-8.8.3.yaml";
-      stack-sha256 = "1gnip814nhkdpdrr3zamih4134k6g80clx788gsg00sb7n34a3nv";
-      materialized = ./ghcide-pkgs;
       pkg-def-extras = [
-        (hackage: pkgs.lib.mapAttrs (n: v: hackage."${n}"."${v}".revisions.default) compiler-pkgs)
+        # (hackage: pkgs.lib.mapAttrs (n: v: hackage."${n}"."${v}".revisions.default) compiler-pkgs)
         (hackage: {
-          ghcide = import ./ghcide.nix sources.ghcide;
+          lsp-test = import ./lsp-test.nix sources.lsp-test;
+          haskell-lsp = import ./haskell-lsp.nix sources.haskell-lsp;
+          haskell-lsp-types = import ./haskell-lsp-types.nix "${sources.haskell-lsp}/haskell-lsp-types";
+          # ghcide = import ./ghcide.nix sources.ghcide;
         })
       ];
       modules = [ ({config, ...}: {
         reinstallableLibGhc = true;
-        packages.ghc.flags.ghci = pkgs.lib.mkForce true;
-        packages.ghci.flags.ghci = pkgs.lib.mkForce true;
-        packages.ghcide.configureFlags = [ "--enable-executable-dynamic" ];
-        packages.haskell-lsp.components.library.doHaddock = pkgs.lib.mkForce false;
-        packages.ghcide.components.library.doHaddock = pkgs.lib.mkForce false;
+        inherit nonReinstallablePkgs;
       }) ];
     };
   in {
-    ghcide = hsPkgs.ghcide.components.exes.ghcide // { packages = hsPkgs; };
-#    haskell-language-server = hsPkgs.haskell-language-server.components.exes.haskell-language-server;
+    # ghcide = hsPkgs.ghcide.components.exes.ghcide // { packages = hsPkgs; };
+    haskell-language-server = hsPkgs.haskell-language-server.components.exes.haskell-language-server;
   };
 
   hsPkgs = pkgs.haskell-nix.stackProject {
     src = pkgs.haskell-nix.haskellLib.cleanGit { src = ../.; name = "dymopipe"; };
     ghc = pkgs.buildPackages.pkgs.haskell-nix.compiler."${ghcVersion}";
     pkg-def-extras = [
-      (hackage: pkgs.lib.mapAttrs (n: v: hackage."${n}"."${v}".revisions.default) compiler-pkgs)
     ];
     modules = [ ({config, ...}: {
       reinstallableLibGhc = true;
+      inherit nonReinstallablePkgs;
     }) ];
   };
 in rec {
   inherit hsPkgs;
-  inherit (hie-pkgs) ghcide;
+  inherit (hie-pkgs) haskell-language-server;
   shell = hsPkgs.shellFor {
     packages = ps: with ps; [
       dymopipe
     ];
 
     additional = ps: with ps; [
+      # ghc
     ];
 
     withHoogle = true;
     buildInputs = (with pkgs.haskellPackages; [
-      hlint stylish-haskell cabal-install niv hpack ghcid
-    ]) ++ [ ghcide pkgs.haskell-nix.nix-tools pkgs.stack ];
+      hlint stylish-haskell cabal-install niv ghcid hpack
+    ]) ++ [ haskell-language-server pkgs.haskell-nix.nix-tools pkgs.stack ];
 
     shellHook = ''
       export NIX_GHC_LIBDIR=$(ghc --print-libdir)

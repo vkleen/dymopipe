@@ -1,10 +1,11 @@
 {-# language UndecidableInstances #-}
 
 module Options.ReadEnum ( ReadEnum(..)
-                , WithOverrides(..)
-                , LispCasePretty(..)
-                , lispCase
-                ) where
+                        , WithOverrides(..)
+                        , LispCasePretty(..)
+                        , Mapping(..)
+                        , lispCase
+                        ) where
 
 import Options.Applicative hiding (command)
 import Control.Lens (ix)

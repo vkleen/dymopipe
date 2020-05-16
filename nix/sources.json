@@ -12,15 +12,23 @@
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "haskell-language-server": {
+        "fetchSubmodules": true,
+        "ref": "master",
+        "repo": "https://github.com/haskell/haskell-language-server.git",
+        "rev": "08dd104a0436a6ede9bff6d1a64eac3ec89e615f",
+        "sha256": "1ssr48vnf4jjvdc4jf2000z20yzfs8bwaz54mnj3d8vncahinhgq",
+        "type": "git"
+    },
+    "haskell-lsp": {
         "branch": "master",
-        "description": "Integration point for ghcide and haskell-ide-engine. One IDE to rule them all.",
+        "description": "Haskell library for the Microsoft Language Server Protocol",
         "homepage": null,
-        "owner": "haskell",
-        "repo": "haskell-language-server",
-        "rev": "5570da98ac51cdd71a7b82b7c3538d2f892332c6",
-        "sha256": "1znij5l9f5k9jskj6f8vmbxsqmp861pc6w825nbjif7gz27izc7g",
+        "owner": "alanz",
+        "repo": "haskell-lsp",
+        "rev": "2ff11293fc55cb59a095918d4193a748bb78078f",
+        "sha256": "1qsc3rs18mb0sa3f9q639pw7mfbssdm3jwwd8q0c7jb049g7rmxw",
         "type": "tarball",
-        "url": "https://github.com/haskell/haskell-language-server/archive/5570da98ac51cdd71a7b82b7c3538d2f892332c6.tar.gz",
+        "url": "https://github.com/alanz/haskell-lsp/archive/2ff11293fc55cb59a095918d4193a748bb78078f.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "haskell.nix": {
@@ -29,10 +37,22 @@
         "homepage": "https://input-output-hk.github.io/haskell.nix",
         "owner": "input-output-hk",
         "repo": "haskell.nix",
-        "rev": "42f7eb16c7d16631700aec9e26a6a55f33e8c477",
-        "sha256": "12h5dhsrs3ambpg9r2cygqcr23c1nl5x2qs9hrghjz57nbkr7wjk",
+        "rev": "caf4e3064beea8fd9fa3f028c427b0eba20998e2",
+        "sha256": "17921fvbi2pcyshkirdjc8qsf75wm1hfnqkmb27yl21q26zi13pn",
         "type": "tarball",
-        "url": "https://github.com/input-output-hk/haskell.nix/archive/42f7eb16c7d16631700aec9e26a6a55f33e8c477.tar.gz",
+        "url": "https://github.com/input-output-hk/haskell.nix/archive/caf4e3064beea8fd9fa3f028c427b0eba20998e2.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    },
+    "lsp-test": {
+        "branch": "master",
+        "description": "A functional test framework for LSP servers",
+        "homepage": null,
+        "owner": "bubba",
+        "repo": "lsp-test",
+        "rev": "57f01faf8784ed1e09a0937e5f8085923f03e9cd",
+        "sha256": "1rxp2awk7a64gy3yiz17f7qr4byrhqaxc2a4zmq7rhiv39mlv1g4",
+        "type": "tarball",
+        "url": "https://github.com/bubba/lsp-test/archive/57f01faf8784ed1e09a0937e5f8085923f03e9cd.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "niv": {
@@ -53,10 +73,10 @@
         "homepage": "https://github.com/NixOS/nixpkgs",
         "owner": "vkleen",
         "repo": "nixpkgs",
-        "rev": "b405b27d8af2470a53af029eea34f1e21b511eef",
-        "sha256": "19p0mjchj2ii2mdn191fjzm8n0641qp05lnlgp8swynwhbs1x6xw",
+        "rev": "904e33f8a87736ee99c44e68163cfd48aa1733bc",
+        "sha256": "02586dmw7qmndngj4wzjph3cghzwq4n99k0h1h7j24w609w3znlf",
         "type": "tarball",
-        "url": "https://github.com/vkleen/nixpkgs/archive/b405b27d8af2470a53af029eea34f1e21b511eef.tar.gz",
+        "url": "https://github.com/vkleen/nixpkgs/archive/904e33f8a87736ee99c44e68163cfd48aa1733bc.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     }
 }

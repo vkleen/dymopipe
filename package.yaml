@@ -38,6 +38,7 @@ default-extensions:
   - FlexibleContexts
   - FlexibleInstances
   - GADTs
+  - InstanceSigs
   - KindSignatures
   - LambdaCase
   - MultiParamTypeClasses
@@ -46,6 +47,7 @@ default-extensions:
   - OverloadedStrings
   - PolyKinds
   - QuasiQuotes
+  - RankNTypes
   - RecordWildCards
   - ScopedTypeVariables
   - StandaloneDeriving
@@ -70,18 +72,23 @@ dependencies:
   - bytestring
   - generic-lens
   - generic-monoid
+  - generic-override
   - hexquote
+  - hip
   - lens
   - mason
   - optparse-applicative
   - optparse-generic
+  - posix-paths
   - pretty-hex
   - rawfilepath
+  - singletons
   - text
   - type-level-sets
   - unix
   - usb
   - vector
+  - vinyl
 
 executable:
   main: Main.hs

@@ -7,10 +7,27 @@ extra-deps:
   - type-level-sets-0.8.9.0
   - bindings-libusb-1.4.5.0
   - usb-1.3.0.6
+  - generic-lens-core-2.0.0.0
+  - generic-lens-2.0.0.0
+  - hip-1.5.5.0
+  - repa-3.4.1.4
+  - hpath-0.11.0
+  - hpath-filepath-0.10.4
+  - hpath-io-0.13.1
+  - hpath-directory-0.13.3
+  - hpath-posix-0.13.2
+  - IfElse-0.85
+  - streamly-bytestring-0.1.2
   - git: https://github.com/fumieval/mason.git
     commit: 7251b09b2b8c0ca9e8d59b90a1154742f149d87f
     #nix-sha256: 0bf5141sk0lrwri21s59gd4659cxqbhygw75dzph9gbhjkvm7aya
   - git: https://github.com/Philonous/hexquote
     commit: 61777223576644185689f2303684644acfd67d24
     #nix-sha256: 0lf2bxhd4hyls057wgmlgdagav7y5b9d54pqv6i0msjjlyx6kpw3
+  - git: https://github.com/estatico/generic-override
+    commit: cbc64fa80dffb492187772b6343fe8e11443769a
+    #nix-sha256: 1ylgdy87jly6g0rp7l1ihg907m71l9sm2dqhzp977rl0adrifhvh
+  - git: https://github.com/VinylRecords/vinyl
+    commit: 48b8066ee9899b9c402777376be20fbc5af4eb07
+    #nix-sha256: 0mw86rx6mccgkc3zp5i6vy9156qs89xr9a5rbislyaadq9dkgwr7
 

@@ -7,7 +7,7 @@ import qualified Data.Vector as V
 import qualified System.USB as USB
 import qualified Control.Lens as L
 import Control.Lens.Operators ((^.), (^?))
-import Data.Singletons.Prelude
+import Prelude.Singletons
 import Data.Singletons.Sigma
 import System.IO (hPutStrLn)
 import qualified Mason.Builder as M
@@ -30,7 +30,7 @@ send o@(s :&: _) inp = do
   where endpoint Tape  = tapeEndpointOut
         endpoint Label = labelEndpointOut
 
-        prologue =  stimes 84 (M.word8 0x1b)
+        prologue =  stimes 85 (M.word8 0x1b)
                  <> if o ^. #reset
                     then M.word8 0x1b <> M.word8 0x40
                     else mempty

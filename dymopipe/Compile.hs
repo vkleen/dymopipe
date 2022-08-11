@@ -71,4 +71,7 @@ common o img = mconcat $ [
 
     encode8 :: Int -> Int -> Word8
     encode8 r c = foldr1 (.|.)
-      [ (coerce @_ @Word8 $ G.defaultIndex G.off img (r,c+i)) `shiftL` (7-i) | i <- [0 .. 7] ]
+      [ pixelAt r (c+i) `shiftL` (7-i) | i <- [0 .. 7] ]
+
+    pixelAt :: Int -> Int -> Word8
+    pixelAt r c = coerce @_ @Word8 $ G.defaultIndex G.off img (r,c)

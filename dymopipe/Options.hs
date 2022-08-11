@@ -2,6 +2,7 @@
 {-# language TemplateHaskell #-}
 {-# language UndecidableInstances #-}
 {-# language FunctionalDependencies #-}
+{-# language StandaloneKindSignatures #-}
 
 {-# OPTIONS_GHC -Wno-unticked-promoted-constructors
                 -Wno-unused-top-binds
@@ -33,14 +34,14 @@ module Options ( getOptions
                , (=:)
                ) where
 
-import Prelude hiding (length, show)
+import Prelude hiding (length, show, getArgs)
 import Data.Maybe (fromJust)
 import Data.Vinyl (Rec(..))
 import qualified Data.Vinyl.TypeLevel as V
 import qualified Data.Vinyl.Functor as V
 import qualified Data.Vinyl.ARec as V
 import qualified Data.Vinyl as V
-import Data.Singletons.Prelude hiding (Last)
+import Prelude.Singletons hiding (Last, Length)
 import Data.Singletons.Sigma
 import Data.Singletons.TH (genSingletons, genDefunSymbols, showSingInstances)
 import Data.Type.Set hiding (Proxy)

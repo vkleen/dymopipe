@@ -83,6 +83,7 @@ dependencies:
   - pretty-hex
   - rawfilepath
   - singletons
+  - singletons-base
   - text
   - type-level-sets
   - unix

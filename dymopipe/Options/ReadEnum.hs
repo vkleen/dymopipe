@@ -12,7 +12,7 @@ import Control.Lens (ix)
 import Control.Lens.Operators
 import GHC.Generics
 import GHC.TypeLits hiding (Mod)
-import Data.Type.Map
+import Data.Type.Map hiding (empty)
 import Data.Char
 
 import Text.PrettyPrint.ANSI.Leijen hiding ((<$>), empty)

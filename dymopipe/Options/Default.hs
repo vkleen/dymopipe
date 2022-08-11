@@ -10,7 +10,7 @@ module Options.Default ( defaultCommonArgs
 
 import Data.Vinyl (Rec(..))
 import qualified Data.Vinyl as V
-import Data.Singletons.Prelude hiding (Last)
+import Prelude.Singletons hiding (Last)
 import {-# SOURCE #-} Options
 
 idVendorDYMO :: Word16

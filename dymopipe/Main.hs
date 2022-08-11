@@ -13,7 +13,7 @@ import Control.Applicative.Lift (runErrors)
 import Data.Singletons.Sigma
 import Data.Generics.Labels ()
 import qualified Control.Lens as L
-import Control.Lens.Operators ((^.))
+import Control.Lens.Operators ((^.), (.~))
 import qualified Data.ByteString.RawFilePath as BS
 import qualified Data.ByteString.Char8 as BS8
 
@@ -54,17 +54,20 @@ doCompile o = do
 
   let img :: G.Image G.VS G.X G.Bit = G.thresholdWith (G.PixelRGB (<128) (<128) (<128)) rgbImg
 
-  if G.rows img /= o ^. #width . L.to fromIntegral
-    then hPutStrLn stderr "Rescaling is not implemented yet (width)" >> exitFailure
-    else pure ()
+  case o ^. #width of
+    FromImage | G.rows img > 672 -> hPutStrLn stderr "Image width cannot be larger than 672" >> exitFailure
+    Width w | G.rows img /= fromIntegral w -> hPutStrLn stderr "Rescaling is not implemented yet (width)" >> exitFailure
+    _ -> pure ()
 
   case o ^. #length of
     Continuous -> pure ()
     Length l   -> if G.cols img > fromIntegral l
                     then hPutStrLn stderr "Rescaling is not implemented yet (length)" >> exitFailure
                     else pure ()
+
+  let o' = o & #width .~ (Width . fromIntegral $ G.rows img)
   let img' = G.transpose . G.flipH $ img
-  M.hPutBuilder stdout $ compile o img'
+  M.hPutBuilder stdout $ compile o' img'
 
   -- let img = G.makeImage (l, w) \(r, c) -> if
   --       | r `rem` w <= c && c <= (r `rem` w) + 40 -> 1

@@ -44,7 +44,7 @@ defaultSendTapeArgs = V.rcast $
 
 defaultCompileArgs :: V.Rec Attr CommonCompileOptionsF
 defaultCompileArgs = V.rcast $
-     #width =: 672
+     #width =: FromImage
   :& #length =: Continuous
   :& V.RNil
 
@@ -57,7 +57,7 @@ defaultCompileLabelArgs = V.rcast $
 defaultCompileTapeArgs :: V.Rec Attr ('["width"] ++ TapeCompileOptionsF)
 defaultCompileTapeArgs = V.rcast $
      #tapeType =: BlackOnWhite
-  :& #width =: 80
+  :& #width =: FromImage
   :& V.RNil
 
 

@@ -36,8 +36,7 @@ data FieldLabel (f :: Symbol)
 instance (s ~ f) => IsLabel s (FieldLabel f)
 (=:) :: FieldLabel f -> ElF f -> Attr f
 
-newtype Width = Width Word16
-instance Num Width
+data Width = FromImage | Width Word16
 
 data FormFeed = Short | Long | None
 

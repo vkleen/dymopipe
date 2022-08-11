@@ -60,6 +60,7 @@ common o img = mconcat $ [
     l (Length x) = M.word16BE x
     l Continuous = M.word16BE 0xffff
 
+    w FromImage = error "Impossibru"
     w (Width x) = M.word8 (fromIntegral $ (x + 7) `shiftR` 3)
 
     pixels :: M.Buildable s => [M.BuilderFor s]

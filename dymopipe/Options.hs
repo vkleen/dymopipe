@@ -115,16 +115,16 @@ instance IsString Input where
   fromString "-" = Stdin
   fromString x = Path $ fromString x
 
-newtype Width = Width Word16
+data Width = FromImage | Width Word16
   deriving stock (Show)
-  deriving (Enum, Num, Ord, Eq, Real, Integral) via Word16
+  --deriving (Enum, Num, Ord, Eq, Real, Integral) via Word16
 
 data Length = Continuous | Length Word16
   deriving stock (Show)
 
-instance Bounded Width where
-  minBound = Width 1
-  maxBound = Width 672
+--instance Bounded Width where
+--  minBound = Width 1
+--  maxBound = Width 672
 
 type family ElF (f :: Symbol) :: Type where
   ElF "verbose" = Bool
@@ -305,6 +305,7 @@ x <$$$> P.Empty = x
 x <$$$> y = x P.<$> y
 
 instance Pretty Width where
+  pretty FromImage = "from-image"
   pretty (Width x) = text (show x) <> "px"
 
 instance Pretty Length where
@@ -546,6 +547,24 @@ rLength = str >>= \s ->
       Left _ -> fail "Length must be an integer or 'c' for continuous printing"
       Right x -> pure x
 
+pWidth :: A.Parser Width
+pWidth =     (Width <$> A.decimal)
+          <|> (A.char 'i' *> pure FromImage)
+
+rWidth :: ReadM Width
+rWidth = str >>= \s ->
+    case A.parseOnly (pWidth <* A.skipSpace <* A.endOfInput) s of
+      Left _ -> fail "Width must be an integer or 'i' for the width of the input"
+      Right x -> f x
+  where f (Width i) | i < lower = fail msg
+                    | i > upper = fail msg
+                    | otherwise = pure . Width $ i
+        f FromImage = pure FromImage
+        lower, upper :: Word16
+        lower = 1
+        upper = 672
+        msg = "Width must be within the range [" <> printf "%d" lower <> " .. " <> printf "%d" upper <> "]"
+
 pCompile :: Parser RawOptions
 pCompile = do
   target       <- lastOption' $ option (   readEnum @Target
@@ -574,11 +593,11 @@ pCompile = do
                                        <> metavar "TAPE-TYPE"
                                        <> help "Set tape type; pass '?' for a list of available tape types"
                                        )
-  width        <- lastOption  $ option (rBounded @Width "%d")
+  width        <- lastOption  $ option rWidth
                                        (  long "width"
                                        <> short 'w'
                                        <> metavar "INT"
-                                       <> help "Label width in pixels"
+                                       <> help "Label width in pixels or 'i' for the width of the input"
                                        )
   length       <- lastOption  $ option rLength
                                        (  long "length"

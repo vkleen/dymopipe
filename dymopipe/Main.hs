@@ -54,20 +54,19 @@ doCompile o = do
 
   let img :: G.Image G.VS G.X G.Bit = G.thresholdWith (G.PixelRGB (<128) (<128) (<128)) rgbImg
 
-  case o ^. #width of
+  o <- case o ^. #width of
     FromImage | G.rows img > 672 -> hPutStrLn stderr "Image width cannot be larger than 672" >> exitFailure
+              | otherwise -> pure $ o & #width .~ (Width . fromIntegral $ G.rows img)
     Width w | G.rows img /= fromIntegral w -> hPutStrLn stderr "Rescaling is not implemented yet (width)" >> exitFailure
-    _ -> pure ()
+    _ -> pure o
 
-  case o ^. #length of
-    Continuous -> pure ()
-    Length l   -> if G.cols img > fromIntegral l
-                    then hPutStrLn stderr "Rescaling is not implemented yet (length)" >> exitFailure
-                    else pure ()
+  o <- case o ^. #length of
+    Continuous -> pure o
+    LFromImage -> pure $ o & #length .~ (Length . fromIntegral $ G.cols img)
+    Length l   | G.cols img > fromIntegral l -> hPutStrLn stderr "Rescaling is not implemented yet (length)" >> exitFailure
 
-  let o' = o & #width .~ (Width . fromIntegral $ G.rows img)
   let img' = G.transpose . G.flipH $ img
-  M.hPutBuilder stdout $ compile o' img'
+  M.hPutBuilder stdout $ compile o img'
 
   -- let img = G.makeImage (l, w) \(r, c) -> if
   --       | r `rem` w <= c && c <= (r `rem` w) + 40 -> 1

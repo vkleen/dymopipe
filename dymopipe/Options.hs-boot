@@ -56,6 +56,6 @@ data TapeType = BlackOnWhite
 
 data Density = Light | Medium | Normal | Dark
 
-data Length = Continuous | Length Word16
+data Length = Continuous | LFromImage | Length Word16
 
 data Input = Path ByteString | Stdin

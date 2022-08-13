@@ -119,7 +119,7 @@ data Width = FromImage | Width Word16
   deriving stock (Show)
   --deriving (Enum, Num, Ord, Eq, Real, Integral) via Word16
 
-data Length = Continuous | Length Word16
+data Length = Continuous | LFromImage | Length Word16
   deriving stock (Show)
 
 --instance Bounded Width where
@@ -310,6 +310,7 @@ instance Pretty Width where
 
 instance Pretty Length where
   pretty Continuous = "continuous"
+  pretty LFromImage = "from-image"
   pretty (Length n) = text (show n)
 
 newtype PrettyHexWord16 = PrettyHexWord16 Word16
@@ -540,11 +541,12 @@ lastOption' p = coerce <$> optional p
 pLength :: A.Parser Length
 pLength =     (Length <$> A.decimal)
           <|> (A.char 'c' *> pure Continuous)
+          <|> (A.char 'i' *> pure LFromImage)
 
 rLength :: ReadM Length
 rLength = str >>= \s ->
     case A.parseOnly (pLength <* A.skipSpace <* A.endOfInput) s of
-      Left _ -> fail "Length must be an integer or 'c' for continuous printing"
+      Left _ -> fail "Length must be an integer or 'c' for continuous printing or 'i' for the length of the input"
       Right x -> pure x
 
 pWidth :: A.Parser Width
@@ -603,7 +605,7 @@ pCompile = do
                                        (  long "length"
                                        <> short 'l'
                                        <> metavar "INT"
-                                       <> help "Label length in pixels or 'c' for continuous printing"
+                                       <> help "Label length in pixels or 'c' for continuous printing or 'i' for the length of the input"
                                        )
   pure $ RawOptions (Compile <$> target) (mempty @RawRec &~ do
     #hiDpi .= hiDpi
